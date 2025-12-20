@@ -771,6 +771,28 @@
     0 0 15px rgba(138, 43, 226, 0.7),
     0 0 30px rgba(106, 92, 255, 0.6);
 }
+.refresh-float {
+  position: fixed;
+  right: 16px;
+  bottom: 90px; /* di atas bottom nav */
+  z-index: 999;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: none;
+  font-size: 14px;
+  color: #fff;
+  cursor: grab;
+
+  background: linear-gradient(135deg, #00f2fe, #7f00ff);
+  box-shadow: 0 0 15px rgba(127, 0, 255, 0.7);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.refresh-float:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+  box-shadow: 0 0 8px rgba(0, 242, 254, 0.8);
+}
     </style>
 </head>
 <body>
@@ -940,6 +962,10 @@
     <audio id="bgMusic" loop>
         <source src="https://j.top4top.io/m_3641621c60.mp3" type="audio/mpeg">
     </audio>
+    
+<button id="refreshBtn" class="refresh-float" onclick="forceRefresh()">
+  🔄 Refresh
+</button>
 
     <script>
         const waNumber = '6285733612050';
@@ -971,32 +997,51 @@
             }
         };
 
-        let products = [
-            {
-                id: 1,
-                name: 'Scrip Bug The Whart v3.0',
-                price: 45000,
-                desc: 'efek bug : kill ui,fc new,blank hard,delay,buldoz',
-                icon: '📱',
-                stock: 5
-            },
-            {
-                id: 2,
-                name: 'Jasa bug medium',
-                price: 5000,
-                desc: 'efek : fc,delay',
-                icon: '⚔️',
-                stock: 3
-            },
-            {
-                id: 3,
-                name: 'jasa bug hard',
-                price: 7000,
-                desc: 'Efek: delay hard,fc,kill ui',
-                icon: '⚔️',
-                stock: 10
-            }
-        ];
+
+function forceRefresh() {
+  const btn = document.getElementById("refreshBtn");
+  btn.innerHTML = "⏳ Loading...";
+
+  fetch("https://raw.githubusercontent.com/seishiro9/Seishirodb/main/products.js?nocache=" + Date.now())
+    .then(res => res.text())
+    .then(code => {
+      eval(code);       // isi ulang products
+      renderProducts();
+      btn.innerHTML = "✅ Updated";
+      setTimeout(() => btn.innerHTML = "🔄 Refresh", 1500);
+    })
+    .catch(() => {
+      btn.innerHTML = "❌ Error";
+      setTimeout(() => btn.innerHTML = "🔄 Refresh", 1500);
+    });
+}
+
+
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  document.getElementById(page + 'Page').classList.add('active');
+
+  const pageIndex = ['home', 'store', 'payment', 'admin'].indexOf(page);
+  if (pageIndex !== -1) {
+    document.querySelectorAll('.nav-item')[pageIndex].classList.add('active');
+  }
+
+  // SHOW / HIDE REFRESH BUTTON
+  const refreshBtn = document.getElementById('refreshBtn');
+  if (refreshBtn) {
+    refreshBtn.style.display = (page === 'store') ? 'block' : 'none';
+  }
+
+  currentPage = page;
+}
+
+
+
+
+
+
 
         // Music Functions
         function toggleMusic() {
@@ -1203,4 +1248,4 @@
         updateStats();
     </script>
 </body>
-  </html>
+</html>
